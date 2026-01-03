@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Weather App</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.weather-card {
+    width: 350px;
+    padding: 25px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    color: white;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.weather-card h1 {
+    margin-bottom: 15px;
+}
+
+.search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+.search button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #ffffff;
+    color: #333;
+    font-weight: bold;
+}
+
+.loader {
+    display: none;
+    margin-top: 15px;
+}
+
+.weather-info {
+    display: none;
+    margin-top: 15px;
+}
+
+.temp {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.details {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.error {
+    margin-top: 10px;
+    color: #ffdddd;
+}
+</style>
+</head>
+
+<body>
+
+<div class="weather-card">
+    <h1>🌤 Weather App</h1>
+
+    <div class="search">
+        <input type="text" id="cityInput" placeholder="Enter city">
+        <button onclick="getWeather()">Search</button>
+    </div>
+
+    <div class="loader" id="loader">Loading...</div>
+
+    <div class="weather-info" id="weatherInfo">
+        <h2 id="cityName"></h2>
+        <div class="temp" id="temperature"></div>
+        <div id="condition"></div>
+
+        <div class="details">
+            <div>Feels Like: <span id="feelsLike"></span>°C</div>
+            <div>Humidity: <span id="humidity"></span>%</div>
+            <div>Wind: <span id="wind"></span> km/h</div>
+            <div>Country: <span id="country"></span></div>
+        </div>
+    </div>
+
+    <div class="error" id="error"></div>
+</div>
+
+<script>
+const apiKey = "b3ceedd3a65b49968a4151931252912";
+
+function getWeather() {
+    const city = document.getElementById("cityInput").value;
+    const loader = document.getElementById("loader");
+    const weatherInfo = document.getElementById("weatherInfo");
+    const errorDiv = document.getElementById("error");
+
+    if (city === "") {
+        errorDiv.textContent = "Please enter a city name";
+        return;
+    }
+
+    loader.style.display = "block";
+    weatherInfo.style.display = "none";
+    errorDiv.textContent = "";
+
+    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            loader.style.display = "none";
+
+            if (data.error) {
+                errorDiv.textContent = "City not found";
+                return;
+            }
+
+            document.getElementById("cityName").textContent =
+                `${data.location.name}, ${data.location.region}`;
+            document.getElementById("country").textContent =
+                data.location.country;
+
+            document.getElementById("temperature").textContent =
+                `${data.current.temp_c}°C`;
+
+            document.getElementById("condition").textContent =
+                data.current.condition.text;
+
+            document.getElementById("feelsLike").textContent =
+                data.current.feelslike_c;
+
+            document.getElementById("humidity").textContent =
+                data.current.humidity;
+
+            document.getElementById("wind").textContent =
+                data.current.wind_kph;
+
+            weatherInfo.style.display = "block";
+        })
+        .catch(() => {
+            loader.style.display = "none";
+            errorDiv.textContent = "Something went wrong";
+        });
+}
+
+/* Enter key support */
+document.getElementById("cityInput")
+    .addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            getWeather();
+        }
+    });
+</script>
+
+</body>
+</html>
